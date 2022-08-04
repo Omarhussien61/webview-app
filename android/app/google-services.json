@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1008409613903",
+    "project_id": "wiakum-662d2",
+    "storage_bucket": "wiakum-662d2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1008409613903:android:9a57d02ddb8cd749cbbc3a",
+        "android_client_info": {
+          "package_name": "com.wiakum"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1008409613903-vcb8pgorrosepakorp0dl03qdhrq79dt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wiakum",
+            "certificate_hash": "0a9272f85c15b76b5234cccbdd3852d994df0317"
+          }
+        },
+        {
+          "client_id": "1008409613903-nouke1eun9ect93bud7cd15jqucaboji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwTygHU5wUn22TyYPnrFN3hjaIJmctg48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1008409613903-nouke1eun9ect93bud7cd15jqucaboji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
