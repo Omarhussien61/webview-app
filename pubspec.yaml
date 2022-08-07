@@ -43,7 +43,9 @@ dependencies:
   responsive_grid_list: ^1.2.5
   shared_preferences: ^2.0.15
   flutter_share: ^2.0.0
-
+  fab_circular_menu: ^1.0.2
+  font_awesome_flutter: ^10.1.0
+  flutter_svg:
   urwaypayment:
     path:  /Users/ahmedhassan/Documents/urway_payment
 
@@ -76,6 +78,7 @@ flutter:
      - assets/logo_icon.png
      - assets/splash.gif
      - assets/apple_pay.json
+     - assets/computer-networks.png
      - assets/appconfig.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

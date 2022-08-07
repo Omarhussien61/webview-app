@@ -257,7 +257,10 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
         : Categories[checkboxType].childrenData == null
             ? Container()
             : Categories[checkboxType].childrenData!.isEmpty
-                ? Container()
+                ? Center(child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('لا يوجد اقسام فرعيه '),
+                ),)
                 : Padding(
                     padding: const EdgeInsets.all(2.0),
                     child: ListView.builder(
@@ -282,7 +285,8 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
   item(Categories? categories_item, int index, bool selected) {
     return InkWell(
       onTap: () {
-        setState(() {
+        categories_item!.childrenData!.isEmpty?
+        Navigator.pop(context,categories_item?.url): setState(() {
           checkboxType = index;
         });
       },
@@ -294,13 +298,16 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                 horizontal: BorderSide(
                     color: selected ? Colors.black12 : Color(0x11000000)))),
         child: Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-                width: 8, color: !selected ? Colors.white : Colors.orange),
+                width: 5, color: !selected ? Colors.white : Colors.orange),
             SizedBox(
               width: 2,
             ),
             Container(
+              width: MediaQuery.of(context).size.width / 4.2,
+
               child: Text(
                 "${categories_item?.name}",
                 maxLines: 2,
@@ -309,10 +316,13 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
               ),
             ),
-            // IconButton(
-            //     onPressed: () {
-            //     },
-            //     icon: Icon(Icons.search,color: Color(0xffc8c8c8),))
+            IconButton(
+                onPressed: () {
+                  Navigator.pop(context,categories_item?.url);
+
+                },
+                icon: Icon(Icons.remove_red_eye_outlined,color: Color(0xffc8c8c8),))
+
           ],
         ),
       ),
@@ -335,6 +345,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     horizontal: BorderSide(
                         color: selected ? Colors.black12 : Color(0x11000000)))),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                     width: 8, color: !selected ? Colors.white : Colors.orange),
@@ -346,18 +357,25 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.start,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                 ),
-                // IconButton(
-                //     onPressed: () {
-                //     },
-                //     icon: Icon(Icons.search,color: Color(0xffc8c8c8),))
+                IconButton(
+                    onPressed: () {
+                      Navigator.pop(context,categories_item?.url);
+
+                    },
+                    icon: Icon(Icons.remove_red_eye_outlined,color: Color(0xffc8c8c8),))
               ],
             ),
           ),
          Padding(
               padding: const EdgeInsets.all(8.0),
-              child: categories_item!.childrenData!.isEmpty?Container(child: Text('القسم فارغ'),): GridView.builder(
+              child: categories_item!.childrenData!.isEmpty?Container(child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text('لا يوجد اقسام فرعيه ',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                ),
+              ),): GridView.builder(
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(horizontal: 2,vertical: 5),
                 physics: NeverScrollableScrollPhysics(),
@@ -370,59 +388,41 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                     onTap: () {
                       Navigator.pop(context,e?.url);
                     },
-                    child: Container(
-                      decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(15)),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 5.0,
-                                spreadRadius: 1,
-                                offset: Offset(0.0, 2)),
-                          ]),
-                      child: Column(
-                        mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment:
-                        CrossAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.network(
-                                "${e?.image}",
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Text(
-                              "${e?.name}",
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 11),
-                            ),
-                          ),
-                          // IconButton(
-                          //     onPressed: () {
-                          //     },
-                          //     icon: Icon(Icons.search, color: Color(0xffc8c8c8),))
-                        ],
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                          height: 100,
+                          decoration:  BoxDecoration(
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(15)),
+                              image: DecorationImage(image: NetworkImage("${e?.image}"),
+                                  fit: BoxFit.cover),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 5.0,
+                                    spreadRadius: 1,
+                                    offset: Offset(0.0, 2)),
+                              ]),
+                        ),
+                        Text(
+                          "${e?.name}",
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                              fontSize: 11),
+                        ),
+                      ],
                     ),
                   );
                 },
                 gridDelegate:
                 SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.9,
+                    childAspectRatio: 0.7,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10),
               )),
