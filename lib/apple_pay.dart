@@ -78,7 +78,7 @@ class _Apple_PayState extends State<Apple_Pay> {
           udf4:"",
           udf5: "",
           tokenizationType: "1",
-          merchantIdentifier:"merchant.com.alajlanonline.com.app",
+          merchantIdentifier:"com.wiakuminc.wiakumapp",
           shippingCharge: "0.00",
           companyName:"alajlan online"
       );
@@ -86,7 +86,6 @@ class _Apple_PayState extends State<Apple_Pay> {
       Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
       Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
       Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
-
       // Navigator.pushReplacement(context, MaterialPageRoute(builder:
       //     (BuildContext context) {
       //   return Web_View2(initialUrl: "https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434"); }),

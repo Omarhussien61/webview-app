@@ -35,5 +35,6 @@ Future<void> main() async {
       supportedLocales: [
         Locale("ar", ""),
       ],
+
       home: MyApp(), theme: themeData));
 }

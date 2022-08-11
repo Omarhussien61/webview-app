@@ -16,6 +16,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:wiyakm/apple_pay.dart';
 import 'package:wiyakm/constants/strings.dart';
 import 'package:wiyakm/main_categories.dart';
+import 'package:wiyakm/choices_model.dart';
 import 'package:wiyakm/navigator.dart';
 
 class Web_View2 extends StatefulWidget {
@@ -31,7 +32,13 @@ class Web_View2 extends StatefulWidget {
 
 class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
   double? _webViewHeight;
-
+  List<Choices> choices = [
+    // Choices("المفضلة","Wish list",FontAwesomeIcons.android,"https://wiakum.com/ar/wishlist/"),
+    Choices("أسئله شائعه","Frequently asked question",FontAwesomeIcons.question,"https://wiakum.com/ar/faqs/"),
+    Choices("سياسة الإسترجاع","Return policy",Icons.rotate_left,"https://wiakum.com/ar/return-policy/"),
+    Choices("برنامج نقاطي","loyalty Points",FontAwesomeIcons.gift,"https://wiakum.com/ar/wiakum-points/"),
+    Choices("تقسيط المدفوعات","Installments",FontAwesomeIcons.wallet,"https://wiakum.com/ar/installments-smart-payment-plan"),
+  ];
   // is true while a page loading is in progress
   bool _isPageLoading = true;
   bool Loading = true;
@@ -223,31 +230,40 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
           ],
         ),
         floatingActionButton: FabCircularMenu(
-
           children: <Widget>[
+            // IconButton(
+            //     icon:Container(),
+            //     onPressed: () async {
+            //
+            //     }),
             IconButton(
-                icon:Container(),
+                icon: Icon(FontAwesomeIcons.snapchat, color: Colors.white,size: 25,),
                 onPressed: () async {
-
+                  await launch("https://snapchat.com/add/wiakum");
                 }),
-          // IconButton(
-          //     icon: Icon(FontAwesomeIcons.twitter, color: Colors.white,size: 30,),
-          //     onPressed: () async {
-          //       await launch("https://twitter.com/wiakumsa");
-          //     }) ,
-          //   IconButton(
-          //       icon: Icon(FontAwesomeIcons.facebook, color: Colors.white,size: 30,),
-          //       onPressed: () async {
-          //         await launch("https://www.facebook.com/wiakum.sa");
-          //       }),
             IconButton(
-              icon: Icon(Icons.call, color: Colors.white,size: 40,),
+              icon: Icon(FontAwesomeIcons.twitter, color: Colors.white,size: 25,),
+              onPressed: () async {
+                await launch("https://twitter.com/wiakumsa");
+              }) ,
+            IconButton(
+              icon: Icon(FontAwesomeIcons.instagram, color: Colors.white,size: 25,),
+              onPressed: () async {
+                await launch("https://www.instagram.com/wiakum.sa/");
+              }) ,
+            IconButton(
+                icon: Icon(FontAwesomeIcons.facebook, color: Colors.white,size: 25,),
+                onPressed: () async {
+                  await launch("https://www.facebook.com/wiakum.sa");
+                }),
+            IconButton(
+              icon: Icon(Icons.call, color: Colors.white,size: 25,),
               onPressed: () async {
                 await launch("tel://00966592385056");
 
               }),
             IconButton(
-              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.white,size: 40,),
+              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.white,size: 25,),
               onPressed: () async {
                 await launch("https://wa.me/+966555575271");
 
@@ -258,7 +274,7 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
           ringColor: Theme.of(context).primaryColor,
           ringWidth: 100.0,
           ringDiameter: 400.0,
-          fabMargin: EdgeInsets.only(bottom: 70),fabSize: 50,fabOpenColor: Colors.white,
+          fabMargin: EdgeInsets.only(bottom: 57),fabSize: 50,fabOpenColor: Colors.white,
         alignment: Alignment.bottomLeft),
         body: WillPopScope(
           onWillPop: () => _exitApp(context),
@@ -302,6 +318,8 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                     _toasterJavascriptChannel(context),
                   },
                   navigationDelegate: (NavigationRequest request) async {
+                    print('allowing = ${request.url}');
+
                     // String url ="https://stage.wiakum.com/pub/applepay.php?order_id=55555&amount=1.00";
                     Uri uri;
                     uri = Uri.parse(request.url);
@@ -309,7 +327,7 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                       print('blocking navigation to $request}');
                       return NavigationDecision.prevent;
                     } else if (request.url.startsWith(
-                        'https://wiakum.com/payments/order/applepay/')) {
+                        'https://wiakum.com/ar/payments/order/applepay')) {
                       if (Platform.isAndroid) {
                         final snackBar =
                             SnackBar(content: Text('Apple Pay works with IOS'));
@@ -364,27 +382,20 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       InkWell(
-                        onTap: () {
-                          controllerGlobal.loadUrl("${widget.initialUrl}");
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: new BorderRadius.circular(20.0),
-                            //  color: Colors.white,
-                            //   boxShadow: const [
-                            //      BoxShadow(
-                            //         color: Colors.black12,
-                            //         blurRadius: 5.0,
-                            //         offset:  Offset(1.0, 1.0))
-                            //   ],
-                          ),
-                          child: Image.asset(
-                            "assets/logo_icon.png",
-                            width: 50,
-                            height: 50,
-                          ),
-                        ),
-                      ),
+                          onTap: () async {
+                            controllerGlobal.loadUrl("https://wiakum.com/ar/customer/account/login/");
+                          },
+                          child: Container(width: 55,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              //borderRadius: new BorderRadius.circular(20.0),
+                            ),
+                            child: Icon(
+                              FontAwesomeIcons.user,
+
+                            ),
+                          )),
+
                       InkWell(
                           onTap: () async {
                             var result = await Navigator.push(context,
@@ -407,26 +418,60 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                             ),
                           )),
                       InkWell(
+                        onTap: () {
+                          controllerGlobal.loadUrl("${widget.initialUrl}");
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: new BorderRadius.circular(20.0),
+                            //  color: Colors.white,
+                            //   boxShadow: const [
+                            //      BoxShadow(
+                            //         color: Colors.black12,
+                            //         blurRadius: 5.0,
+                            //         offset:  Offset(1.0, 1.0))
+                            //   ],
+                          ),
+                          child: Image.asset(
+                            "assets/logo_icon.png",
+                            width: 50,
+                            height: 50,
+                          ),
+                        ),
+                      ),
+
+                      InkWell(
                           onTap: () async {
 
                           },
                           child: Container(
-                            width: 50,
-                          )),
-                      InkWell(
+                            width: 20,
+                          )),InkWell(
                           onTap: () async {
-                              controllerGlobal.loadUrl("https://wiakum.com/ar/customer/account/login/");
-                          },
-                          child: Container(width: 55,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              //borderRadius: new BorderRadius.circular(20.0),
-                            ),
-                            child: Icon(
-                              FontAwesomeIcons.user,
 
-                            ),
+                          },
+                          child: Container(
+                            width: 20,
                           )),
+
+                      PopupMenuButton<Choices>(
+                          onSelected: choiceAction,
+                          itemBuilder: (BuildContext context){
+                            return choices.map((Choices choice){
+                              return PopupMenuItem<Choices>(
+                                value: choice,
+                                child: Row(
+                                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Icon(choice.icon,color: Colors.black87,),
+                                    SizedBox(width: 10,),
+                                    Text("${choice.name}"),
+                                  ],
+                                ),);
+                            }
+                            ).toList();
+                          },icon: Icon(Icons.more_vert),
+                      ) ,
                     ],
                   ),
                 ),
@@ -543,7 +588,21 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
       return Future.value(false);
     }
   }
-
+  void choiceAction(Choices choice){
+    if(choice.name_en == "Wish list"){
+      controllerGlobal.loadUrl("${choice.link}");
+    }
+    else if(choice.name_en == "Frequently asked question"){
+      controllerGlobal.loadUrl("${choice.link}");
+    }
+    else if(choice.name_en == "Return policy"){
+      controllerGlobal.loadUrl("${choice.link}");
+    } else if(choice.name_en == "loyalty Points"){
+      controllerGlobal.loadUrl("${choice.link}");
+    }else if(choice.name_en == "Installments"){
+      controllerGlobal.loadUrl("${choice.link}");
+    }
+  }
   void _setWebViewHeight() {
     // we don't update if WebView is not ready yet
     // or page load is in progress

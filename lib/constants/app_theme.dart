@@ -4,7 +4,7 @@ import 'colors.dart';
 import 'font_family.dart';
 
 final ThemeData themeData =  ThemeData(
-  fontFamily: FontFamily.tajawal,
+  fontFamily: FontFamily.cairo,
   brightness: Brightness.light,
   cursorColor: AppColors.primaryColor,
   cupertinoOverrideTheme: const CupertinoThemeData(

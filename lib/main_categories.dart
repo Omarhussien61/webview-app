@@ -6,16 +6,24 @@ import 'package:wiyakm/Categories.dart';
 import 'package:wiyakm/service/api.dart';
 
 class MainCategoriesPage extends StatefulWidget {
+
   @override
   _MainCategoriesPageState createState() => _MainCategoriesPageState();
+
 }
 
 class _MainCategoriesPageState extends State<MainCategoriesPage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  ScrollController controller = new ScrollController();
+
+  final GlobalKey<ScaffoldState> scaffoldKey =  GlobalKey<ScaffoldState>();
+
+  ScrollController controller =  ScrollController();
+
   String indexMain = '0';
+
   int checkboxType = 0;
+
   Categories? categories;
+
   @override
   void initState() {
     API(context).get('mobile/categories').then((value) {
@@ -66,7 +74,7 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                             ),
                             child: SingleChildScrollView(
                               child: Container(
-                                width: MediaQuery.of(context).size.width / 2.5,
+                                width: MediaQuery.of(context).size.width / 2.9,
                                 // height: ScreenUtil.getHeight(context) / 1.25,
                                 child: Container(
                                   child: ListView.builder(
@@ -298,36 +306,36 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
                 horizontal: BorderSide(
                     color: selected ? Colors.black12 : Color(0x11000000)))),
         child: Row(
-           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           //mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
                 width: 5, color: !selected ? Colors.white : Colors.orange),
             SizedBox(
-              width: 2,
+              width: 5,
             ),
             Container(
               width: MediaQuery.of(context).size.width / 4.2,
-
               child: Text(
                 "${categories_item?.name}",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                style: TextStyle(fontSize: 12, fontWeight: !selected?FontWeight.w200:FontWeight.w600,color: !selected?Colors.black87:Colors.orange),
               ),
             ),
-            IconButton(
-                onPressed: () {
-                  Navigator.pop(context,categories_item?.url);
-
-                },
-                icon: Icon(Icons.remove_red_eye_outlined,color: Color(0xffc8c8c8),))
-
+            // or
+            //     onPressed: () {
+            //       Navigator.pop(context,categories_item?.url);
+            //
+            //     },
+            //    icon: Icon(Icons.remove_red_eye_outlined,color: Colors.white,)
+            //   )
           ],
         ),
       ),
     );
   }
+
   itemcat(Categories? categories_item, int index, bool selected) {
     return InkWell(
       onTap: () {
@@ -338,33 +346,38 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       child: Column(
         children: [
           Container(
-            height: 60,
+            height: 165,
             decoration: BoxDecoration(
                 color: !selected ? Colors.white : Color(0x11000000),
                 border: Border.symmetric(
                     horizontal: BorderSide(
                         color: selected ? Colors.black12 : Color(0x11000000)))),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                Container(
-                    width: 8, color: !selected ? Colors.white : Colors.orange),
-                SizedBox(
-                  width: 2,
-                ),
-                Text(
-                  "${categories_item?.name}",
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.start,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                ),
-                IconButton(
-                    onPressed: () {
-                      Navigator.pop(context,categories_item?.url);
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                        width: 8, color: !selected ? Colors.white : Colors.orange),
+                    SizedBox(
+                      width: 2,
+                    ),
+                    Text(
+                      "${categories_item?.name}",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 15, fontWeight: !selected?FontWeight.w400:FontWeight.bold),
+                    ),
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pop(context,categories_item?.url);
 
-                    },
-                    icon: Icon(Icons.remove_red_eye_outlined,color: Color(0xffc8c8c8),))
+                        },
+                        icon: Image.asset("assets/logo_icon.png",))
+                  ],
+                ),
+                Image.network( "${categories_item?.image}",height: 115,)
               ],
             ),
           ),
@@ -431,4 +444,5 @@ class _MainCategoriesPageState extends State<MainCategoriesPage> {
       ),
     );
   }
+
 }

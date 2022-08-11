@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child:  Padding(
             padding:EdgeInsets.all(8.0),
-            child: Image.asset("assets/splash.gif",
+            child: Image.asset("assets/splash-side.gif",
               fit: BoxFit.contain,
             ),
           ),

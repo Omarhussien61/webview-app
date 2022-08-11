@@ -45,6 +45,7 @@ dependencies:
   flutter_share: ^2.0.0
   fab_circular_menu: ^1.0.2
   font_awesome_flutter: ^10.1.0
+
   flutter_svg:
   urwaypayment:
     path:  /Users/ahmedhassan/Documents/urway_payment
@@ -77,6 +78,7 @@ flutter:
      - assets/logo.png
      - assets/logo_icon.png
      - assets/splash.gif
+     - assets/splash-side.gif
      - assets/apple_pay.json
      - assets/computer-networks.png
      - assets/appconfig.json
@@ -92,17 +94,25 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
+  fonts:
+    - family: Cairo
+      fonts:
+        #        - asset: assets/fonts/Cairo/Cairo-Black.ttf
+        #        - asset: assets/fonts/Cairo/Cairo-Bold.ttf
+        #        - asset: assets/fonts/Cairo/Cairo-ExtraLight.ttf
+        #        - asset: assets/fonts/Cairo/Cairo-Light.ttf
+        - asset: assets/fonts/Cairo/Cairo-Regular.ttf
+    #        - asset: assets/fonts/Cairo/Cairo-SemiBold.ttf
+    - family: Tajawal
+      fonts:
+        #        - asset: assets/fonts/Tajawal/Tajawal-Black.ttf
+        #        - asset: assets/fonts/Tajawal/Tajawal-Bold.ttf
+        #        - asset: assets/fonts/Tajawal/Tajawal-ExtraBold.ttf
+        #        - asset: assets/fonts/Tajawal/Tajawal-ExtraLight.ttf
+        #        - asset: assets/fonts/Tajawal/Tajawal-Light.ttf
+        - asset: assets/fonts/Tajawal/Tajawal-Regular.ttf
+    # Icons font
+    # go to https://www.fluttericon.com/ and upload the svg files in assets/icons and download the new dart file and font
+    - family: Icomoon
+      fonts:
+        - asset: assets/fonts/icomoon/icomoon.ttf

@@ -1,7 +1,7 @@
 {
   "provider": "apple_pay",
   "data": {
-    "merchantIdentifier": "merchant.com.alajlanonline.com.app",
+    "merchantIdentifier": "com.wiakuminc.wiakumapp",
     "displayName": " wiyakm",
     "merchantCapabilities": ["3DS", "debit", "credit"],
     "supportedNetworks": ["amex", "visa", "discover", "masterCard","mada"],
