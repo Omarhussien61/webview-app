@@ -1,42 +1,77 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:wiyakm/webview2.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:wiyakm/provider/theme_notifier.dart';
+import 'package:wiyakm/splash_screen.dart';
+
 
 class MyApp extends StatefulWidget {
-  const  MyApp({Key? key}) : super(key: key);
+  static void setlocal(BuildContext context, Locale locale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setlocal(locale);
+  }
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+
+  void setlocal(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
 
   @override
   void initState() {
-   Timer(Duration(seconds: 5),()=> Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) { return Web_View2(initialUrl: "https://wiakum.com"); }), (route) => false)) ;
-    // TODO: implement initState
+    _locale =
+        Locale(Provider.of<Provider_control>(context, listen: false).local, "");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-   return Scaffold(
-        body: Center(
-          child:  Padding(
-            padding:EdgeInsets.all(8.0),
-            child: Image.asset("assets/splash-side.gif",
-              fit: BoxFit.contain,
-            ),
-          ),
-        )
-    );  }
+    final themeColor = Provider.of<Provider_control>(context);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Shopping App',
+      localizationsDelegates: [
+       // AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: _locale,
+      localeResolutionCallback: (devicelocale, supportedLocales) {
+        for (var locale in supportedLocales) {
+          if (locale.languageCode == devicelocale?.languageCode &&
+              locale.countryCode == devicelocale?.countryCode) {
+            return devicelocale;
+          }
+        }
+        return supportedLocales.first;
+      },
+      supportedLocales: [
+        Locale("en", ""),
+        Locale("ar", ""),
+      ],
+      theme: ThemeData(
+        pageTransitionsTheme: PageTransitionsTheme(builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        }),
+        primaryColor:Colors.deepOrangeAccent,
+        appBarTheme: AppBarTheme(color: Colors.deepOrangeAccent),
+        fontFamily: 'Cairo',
 
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor:Colors.deepOrangeAccent,
+          behavior: SnackBarBehavior.floating,
+
+        ),
+      ),
+      home: SplashScreen(),
+    );
+  }
 }

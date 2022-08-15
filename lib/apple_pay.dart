@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urwaypayment/urwaypayment.dart';
+import 'package:wiyakm/provider/theme_notifier.dart';
 
 class Apple_Pay extends StatefulWidget {
    Apple_Pay({Key? key,required this.order_id,required this.mount}) : super(key: key);
@@ -58,6 +60,8 @@ class _Apple_PayState extends State<Apple_Pay> {
   }
 
   Future<void> _performtrxn(BuildContext context ,String transType ) async {
+    final model = Provider.of<Provider_control>(context);
+
     var lastResult ="";
     var act='1';
     var carOper='1';
@@ -83,12 +87,11 @@ class _Apple_PayState extends State<Apple_Pay> {
           companyName:"alajlan online"
       );
       print('Result on Apple Pay in Main is $lastResult');
-      Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
-      Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
-      Navigator.pop(context,"https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
+      Navigator.pop(context,"${model.getBaseUrl()}payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
+      Navigator.pop(context,"${model.getBaseUrl()}payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
+      Navigator.pop(context,"${model.getBaseUrl()}payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
       // Navigator.pushReplacement(context, MaterialPageRoute(builder:
       //     (BuildContext context) {
-      //   return Web_View2(initialUrl: "https://wiakum.com/payments/order/applepay?orderId=${widget.order_id}&amount=${widget.mount}&payment_result=success&merchant_reference=1999&payment_id=4343434"); }),
       // );
 
     }

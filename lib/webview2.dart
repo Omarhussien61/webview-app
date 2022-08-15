@@ -10,6 +10,8 @@ import 'package:flutter_share/flutter_share.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:urwaypayment/urwaypayment.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -17,35 +19,47 @@ import 'package:wiyakm/apple_pay.dart';
 import 'package:wiyakm/constants/strings.dart';
 import 'package:wiyakm/main_categories.dart';
 import 'package:wiyakm/choices_model.dart';
+import 'package:wiyakm/myapp.dart';
 import 'package:wiyakm/navigator.dart';
+import 'package:wiyakm/provider/theme_notifier.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 
 class Web_View2 extends StatefulWidget {
-  const Web_View2({Key? key, this.cookieManager, this.initialUrl})
-      : super(key: key);
-
-  final CookieManager? cookieManager;
-  final String? initialUrl;
-
   @override
   State<Web_View2> createState() => _Web_View2State();
 }
 
 class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
   double? _webViewHeight;
-  List<Choices> choices = [
-    // Choices("المفضلة","Wish list",FontAwesomeIcons.android,"https://wiakum.com/ar/wishlist/"),
-    Choices("أسئله شائعه","Frequently asked question",FontAwesomeIcons.question,"https://wiakum.com/ar/faqs/"),
-    Choices("سياسة الإسترجاع","Return policy",Icons.rotate_left,"https://wiakum.com/ar/return-policy/"),
-    Choices("برنامج نقاطي","loyalty Points",FontAwesomeIcons.gift,"https://wiakum.com/ar/wiakum-points/"),
-    Choices("تقسيط المدفوعات","Installments",FontAwesomeIcons.wallet,"https://wiakum.com/ar/installments-smart-payment-plan"),
-  ];
+  List<Choices> choices = [];
+
   // is true while a page loading is in progress
   bool _isPageLoading = true;
   bool Loading = true;
   String? lastUrl;
 
+  bool canback = false;
+  int progress = 0;
+  final Completer<WebViewController> _controller =
+  Completer<WebViewController>();
+  late WebViewController controllerGlobal;
+
   @override
   void initState() {
+
+    final model = Provider.of<Provider_control>(context, listen: false);
+
+    choices = [
+      // Choices("المفضلة","Wish list",FontAwesomeIcons.android,"https://wiakum.com/ar/wishlist/"),
+      Choices("أسئله شائعه", "Frequently asked question",
+          FontAwesomeIcons.question, "${model.getBaseUrl()}faqs/"),
+      Choices("سياسة الإسترجاع", "Return policy", Icons.rotate_left,
+          "${model.getBaseUrl()}return-policy/"),
+      Choices("برنامج نقاطي", "loyalty Points", FontAwesomeIcons.gift,
+          "${model.getBaseUrl()}wiakum-points/"),
+      Choices("تقسيط المدفوعات", "Installments", FontAwesomeIcons.wallet,
+          "${model.getBaseUrl()}installments-smart-payment-plan"),
+    ];
     Future.delayed(Duration(seconds: 1), checkNewVersion);
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
@@ -185,316 +199,379 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
     _setWebViewHeight();
   }
 
-  bool canback = false;
-  int progress = 0;
-  final Completer<WebViewController> _controller =
-      Completer<WebViewController>();
-  late WebViewController controllerGlobal;
-
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<Provider_control>(context);
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
           backgroundColor: Colors.white,
-          title: InkWell(
-              onTap: () {
-                controllerGlobal.loadUrl("${widget.initialUrl}");
-              },
-              child: Image.asset(
-                "assets/logo.png",
-                width: 100,
-              )),
-          centerTitle: true,
-          leading: canback
-              ? IconButton(
-                  onPressed: () {
-                    controllerGlobal.goBack();
-                  },
-                  icon: Icon(Icons.keyboard_arrow_right),
-                )
-              : Container(),
-          actions: [
-            IconButton(
-              onPressed: () {
-                controllerGlobal.reload();
-                controllerGlobal.clearCache();
-              },
-              icon: Icon(Icons.refresh),
-            )
-          ],
-        ),
-        floatingActionButton: FabCircularMenu(
-          children: <Widget>[
-            // IconButton(
-            //     icon:Container(),
-            //     onPressed: () async {
-            //
-            //     }),
-            IconButton(
-                icon: Icon(FontAwesomeIcons.snapchat, color: Colors.white,size: 25,),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            title: InkWell(
+                onTap: () {
+                  controllerGlobal.loadUrl("${Strings.MAIN_API_URL_AR}");
+                },
+                child: Image.asset(
+                  "assets/logo.png",
+                  width: 100,
+                )),
+            centerTitle: true,
+            leading: canback
+                ? IconButton(
+                    onPressed: () {
+                      controllerGlobal.goBack();
+                    },
+                    icon: Icon(Icons.keyboard_arrow_right),
+                  )
+                : Container(),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  controllerGlobal.reload();
+                  controllerGlobal.clearCache();
+                },
+                icon: Icon(Icons.refresh),
+              ),
+              IconButton(
                 onPressed: () async {
-                  await launch("https://snapchat.com/add/wiakum");
-                }),
-            IconButton(
-              icon: Icon(FontAwesomeIcons.twitter, color: Colors.white,size: 25,),
-              onPressed: () async {
-                await launch("https://twitter.com/wiakumsa");
-              }) ,
-            IconButton(
-              icon: Icon(FontAwesomeIcons.instagram, color: Colors.white,size: 25,),
-              onPressed: () async {
-                await launch("https://www.instagram.com/wiakum.sa/");
-              }) ,
-            IconButton(
-                icon: Icon(FontAwesomeIcons.facebook, color: Colors.white,size: 25,),
-                onPressed: () async {
-                  await launch("https://www.facebook.com/wiakum.sa");
-                }),
-            IconButton(
-              icon: Icon(Icons.call, color: Colors.white,size: 25,),
-              onPressed: () async {
-                await launch("tel://00966592385056");
-
-              }),
-            IconButton(
-              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.white,size: 25,),
-              onPressed: () async {
-                await launch("https://wa.me/+966555575271");
-
-              }),
-
-        ],
-          fabOpenIcon: Icon(Icons.chat, color: Colors.white),
-          ringColor: Theme.of(context).primaryColor,
-          ringWidth: 100.0,
-          ringDiameter: 400.0,
-          fabMargin: EdgeInsets.only(bottom: 57),fabSize: 50,fabOpenColor: Colors.white,
-        alignment: Alignment.bottomLeft),
-        body: WillPopScope(
-          onWillPop: () => _exitApp(context),
-          child: Stack(
-            children: [
-              Container(
-                //  height:_webViewHeight,
-                //height: MediaQuery.of(context).size.height,
-                child: WebView(
-                  initialUrl: widget.initialUrl,
-                  javascriptMode: JavascriptMode.unrestricted,
-                  onWebViewCreated: (WebViewController webViewController) {
-                    setState(() {
-                      controllerGlobal = webViewController;
-                    });
-                    _controller.complete(webViewController);
-
-                    /// controllerGlobal.clearCache();
-                  },
-                  onPageStarted: (String url) {
-                    setState(() {
-                      _isPageLoading = true;
-                    });
-                  },
-                  onPageFinished: (String url) {
-                    setState(() {
-                      _isPageLoading = false;
-                    });
-                    // if page load is finished, set height
-                    _setWebViewHeight();
-                  },
-                  onProgress: (int progress) async {
-                    canback = await controllerGlobal.canGoBack();
-                    setState(() {
-                      this.progress = progress;
-                      Loading = progress != 100;
-                    });
-                    print('WebView is loading (progress : $progress%)');
-                  },
-                  javascriptChannels: <JavascriptChannel>{
-                    _toasterJavascriptChannel(context),
-                  },
-                  navigationDelegate: (NavigationRequest request) async {
-                    print('allowing = ${request.url}');
-
-                    // String url ="https://stage.wiakum.com/pub/applepay.php?order_id=55555&amount=1.00";
-                    Uri uri;
-                    uri = Uri.parse(request.url);
-                    if (request.url.startsWith('https://www.youtube.com/')) {
-                      print('blocking navigation to $request}');
-                      return NavigationDecision.prevent;
-                    } else if (request.url.startsWith(
-                        'https://wiakum.com/ar/payments/order/applepay')) {
-                      if (Platform.isAndroid) {
-                        final snackBar =
-                            SnackBar(content: Text('Apple Pay works with IOS'));
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        controllerGlobal.loadUrl(widget.initialUrl ?? '');
-                      } else if (Platform.isIOS) {
-                        var result = await Navigator.push(context,
-                            MaterialPageRoute(builder: (BuildContext context) {
-                          return Apple_Pay(
-                            order_id: "${uri.queryParameters['orderId']}",
-                            mount: '${uri.queryParameters['amount']}',
-                          );
-                        }));
-                        if (result != null) {
-                          controllerGlobal.loadUrl(result);
-                        }
-                      }
-
-                      return NavigationDecision.prevent;
-                    } else if (request.url
-                            .startsWith('https://api.whatsapp.com/send') ||
-                        request.url.startsWith(
-                            'https://www.facebook.com/sharer/sharer') ||
-                        request.url
-                            .startsWith('https://twitter.com/intent/tweet?') ||
-                        request.url
-                            .startsWith('https://mail.google.com/mail')) {
-                      NavigationDecision.navigate;
-                      await controllerGlobal.goBack();
-                      await FlutterShare.share(
-                        title: 'وياكم  ',
-                        text: ' منصه آمنه للتجارة الإلكترونية',
-                        linkUrl: '$lastUrl',
-                      );
-                      controllerGlobal.loadUrl(lastUrl!);
-                    } else {
-                      lastUrl = request.url;
-                    }
-                    print('allowing navigation to $request');
-                    return NavigationDecision.navigate;
-                  },
-                  gestureNavigationEnabled: true,
-                  backgroundColor: const Color(0x00000000),
+                  await model.local == 'ar'
+                      ? model.setLocal('en')
+                      : model.setLocal('ar');
+                  MyApp.setlocal(context, Locale(model.getlocal(), ''));
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.setString('local', model.local);
+                  });
+                  controllerGlobal.loadUrl(model.local == 'ar'
+                      ? Strings.MAIN_API_URL_AR
+                      : Strings.MAIN_API_URL_EN);
+                },
+                icon: Text(
+                  model.local == 'ar' ? "EN" : "AR",
+                  style: TextStyle(
+                      color: Colors.deepOrange, fontWeight: FontWeight.bold),
                 ),
               ),
-              Positioned(
-                bottom: 1,
-                right: 1,
-                child: Container(
-                  width: MediaQuery.of(context).size.width ,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ],
+          ),
+          floatingActionButton: FabCircularMenu(
+              children: <Widget>[
+                // IconButton(
+                //     icon:Container(),
+                //     onPressed: () async {
+                //
+                //     }),
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.snapchat,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("https://snapchat.com/add/wiakum");
+                    }),
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.twitter,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("https://twitter.com/wiakumsa");
+                    }),
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.instagram,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("https://www.instagram.com/wiakum.sa/");
+                    }),
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.facebook,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("https://www.facebook.com/wiakum.sa");
+                    }),
+                IconButton(
+                    icon: Icon(
+                      Icons.call,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("tel://00966592385056");
+                    }),
+                IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.whatsapp,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                    onPressed: () async {
+                      await launch("https://wa.me/+966555575271");
+                    }),
+              ],
+              fabOpenIcon: Icon(Icons.chat, color: Colors.white),
+              ringColor: Theme.of(context).primaryColor,
+              ringWidth: 100.0,
+              ringDiameter: 400.0,
+              fabMargin: EdgeInsets.only(bottom: 57),
+              fabSize: 50,
+              fabOpenColor: Colors.white,
+              alignment: Alignment.bottomLeft),
+          body: WillPopScope(
+              onWillPop: () => _exitApp(context),
+              child: OfflineBuilder(
+                connectivityBuilder: (
+                  BuildContext context,
+                  ConnectivityResult connectivity,
+                  Widget child,
+                ) {
+                  final bool connected =
+                      connectivity != ConnectivityResult.none;
+                  return connected?
+                  Stack(
                     children: [
-                      InkWell(
-                          onTap: () async {
-                            controllerGlobal.loadUrl("https://wiakum.com/ar/customer/account/login/");
+                      Container(
+                        //  height:_webViewHeight,
+                        //height: MediaQuery.of(context).size.height,
+                        child: WebView(
+                          initialUrl: model.getBaseUrl(),
+                          javascriptMode: JavascriptMode.unrestricted,
+                          onWebViewCreated:
+                              (WebViewController webViewController) {
+                            setState(() {
+                              controllerGlobal = webViewController;
+                            });
+                            _controller.complete(webViewController);
+
+                            /// controllerGlobal.clearCache();
                           },
-                          child: Container(width: 55,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              //borderRadius: new BorderRadius.circular(20.0),
-                            ),
-                            child: Icon(
-                              FontAwesomeIcons.user,
+                          onPageStarted: (String url) {
+                            setState(() {
+                              _isPageLoading = true;
+                            });
+                          },
+                          onPageFinished: (String url) {
+                            setState(() {
+                              _isPageLoading = false;
+                            });
+                            // if page load is finished, set height
+                            _setWebViewHeight();
+                          },
+                          onProgress: (int progress) async {
+                            canback = await controllerGlobal.canGoBack();
+                            setState(() {
+                              this.progress = progress;
+                              Loading = progress != 100;
+                            });
+                            print('WebView is loading (progress : $progress%)');
+                          },
+                          javascriptChannels: <JavascriptChannel>{
+                            _toasterJavascriptChannel(context),
+                          },
+                          navigationDelegate: (NavigationRequest request) async {
+                            print('allowing = ${request.url}');
 
-                            ),
-                          )),
+                            // String url ="https://stage.wiakum.com/pub/applepay.php?order_id=55555&amount=1.00";
+                            Uri uri;
+                            uri = Uri.parse(request.url);
+                            if (request.url
+                                .startsWith('https://www.youtube.com/')) {
+                              print('blocking navigation to $request}');
+                              return NavigationDecision.prevent;
+                            } else if (request.url.startsWith(
+                                '${model.getBaseUrl()}payments/order/applepay')) {
+                              if (Platform.isAndroid) {
+                                final snackBar = SnackBar(
+                                    content: Text('Apple Pay works with IOS'));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                                controllerGlobal
+                                    .loadUrl(Strings.MAIN_API_URL_AR ?? '');
+                              } else if (Platform.isIOS) {
+                                var result = await Navigator.push(context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return Apple_Pay(
+                                            order_id: "${uri.queryParameters['orderId']}",
+                                            mount: '${uri.queryParameters['amount']}',
+                                          );
+                                        }));
+                                if (result != null) {
+                                  controllerGlobal.loadUrl(result);
+                                }
+                              }
 
-                      InkWell(
-                          onTap: () async {
-                            var result = await Navigator.push(context,
-                                MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                              return MainCategoriesPage();
-                            }));
-                            if (result != null) {
-                              controllerGlobal.loadUrl(result);
+                              return NavigationDecision.prevent;
+                            } else if (request.url.startsWith(
+                                'https://api.whatsapp.com/send') ||
+                                request.url.startsWith(
+                                    'https://www.facebook.com/sharer/sharer') ||
+                                request.url.startsWith(
+                                    'https://twitter.com/intent/tweet?') ||
+                                request.url
+                                    .startsWith('https://mail.google.com/mail')) {
+                              NavigationDecision.navigate;
+                              await controllerGlobal.goBack();
+                              await FlutterShare.share(
+                                title: 'وياكم  ',
+                                text: ' منصه آمنه للتجارة الإلكترونية',
+                                linkUrl: '$lastUrl',
+                              );
+                              controllerGlobal.loadUrl(lastUrl!);
+                            } else {
+                              lastUrl = request.url;
                             }
+                            print('allowing navigation to $request');
+                            return NavigationDecision.navigate;
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: new BorderRadius.circular(20.0),
-                            ),
-                            child: Image.asset(
-                              "assets/computer-networks.png",
-                              width: 30,
-                              color: Colors.black87,
-                            ),
-                          )),
-                      InkWell(
-                        onTap: () {
-                          controllerGlobal.loadUrl("${widget.initialUrl}");
-                        },
+                          gestureNavigationEnabled: true,
+                          backgroundColor: const Color(0x00000000),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 1,
                         child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: new BorderRadius.circular(20.0),
-                            //  color: Colors.white,
-                            //   boxShadow: const [
-                            //      BoxShadow(
-                            //         color: Colors.black12,
-                            //         blurRadius: 5.0,
-                            //         offset:  Offset(1.0, 1.0))
-                            //   ],
-                          ),
-                          child: Image.asset(
-                            "assets/logo_icon.png",
-                            width: 50,
-                            height: 50,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              InkWell(
+                                  onTap: () async {
+                                    controllerGlobal.loadUrl(
+                                        "${model.getBaseUrl()}customer/account/login/");
+                                  },
+                                  child: Container(
+                                    width: 55,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      //borderRadius: new BorderRadius.circular(20.0),
+                                    ),
+                                    child: Icon(
+                                      FontAwesomeIcons.user,
+                                    ),
+                                  )),
+                              InkWell(
+                                  onTap: () async {
+                                    var result = await Navigator.push(context,
+                                        MaterialPageRoute(
+                                            builder: (BuildContext context) {
+                                              return MainCategoriesPage();
+                                            }));
+                                    if (result != null) {
+                                      controllerGlobal.loadUrl(result);
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                      new BorderRadius.circular(20.0),
+                                    ),
+                                    child: Image.asset(
+                                      "assets/computer-networks.png",
+                                      width: 30,
+                                      color: Colors.black87,
+                                    ),
+                                  )),
+                              InkWell(
+                                onTap: () {
+                                  controllerGlobal
+                                      .loadUrl("${Strings.MAIN_API_URL_AR}");
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: new BorderRadius.circular(20.0),
+                                    //  color: Colors.white,
+                                    //   boxShadow: const [
+                                    //      BoxShadow(
+                                    //         color: Colors.black12,
+                                    //         blurRadius: 5.0,
+                                    //         offset:  Offset(1.0, 1.0))
+                                    //   ],
+                                  ),
+                                  child: Image.asset(
+                                    "assets/logo_icon.png",
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                  onTap: () async {},
+                                  child: Container(
+                                    width: 20,
+                                  )),
+                              InkWell(
+                                  onTap: () async {},
+                                  child: Container(
+                                    width: 20,
+                                  )),
+                              PopupMenuButton<Choices>(
+                                onSelected: choiceAction,
+                                itemBuilder: (BuildContext context) {
+                                  return choices.map((Choices choice) {
+                                    return PopupMenuItem<Choices>(
+                                      value: choice,
+                                      child: Row(
+                                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Icon(
+                                            choice.icon,
+                                            color: Colors.black87,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text("${choice.name}"),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList();
+                                },
+                                icon: Icon(Icons.more_vert),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-
-                      InkWell(
-                          onTap: () async {
-
-                          },
-                          child: Container(
-                            width: 20,
-                          )),InkWell(
-                          onTap: () async {
-
-                          },
-                          child: Container(
-                            width: 20,
-                          )),
-
-                      PopupMenuButton<Choices>(
-                          onSelected: choiceAction,
-                          itemBuilder: (BuildContext context){
-                            return choices.map((Choices choice){
-                              return PopupMenuItem<Choices>(
-                                value: choice,
-                                child: Row(
-                                 // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Icon(choice.icon,color: Colors.black87,),
-                                    SizedBox(width: 10,),
-                                    Text("${choice.name}"),
-                                  ],
-                                ),);
-                            }
-                            ).toList();
-                          },icon: Icon(Icons.more_vert),
-                      ) ,
+                      Loading
+                          ? Container(
+                          color: Colors.white,
+                          child: Stack(
+                            children: [
+                              Center(
+                                  child: Text("$progress %",
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.deepOrangeAccent,
+                                          backgroundColor: Colors.white))),
+                              Center(child: Image.asset("assets/splash.gif")),
+                            ],
+                          ))
+                          : Container(),
                     ],
-                  ),
-                ),
-              ),
-              Loading
-                  ? Container(
-                      color: Colors.white,
-                      child: Stack(
-                        children: [
-                          Center(
-                              child: Text("$progress %",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.deepOrangeAccent,
-                                      backgroundColor: Colors.white))),
-                          Center(child: Image.asset("assets/splash.gif")),
-                        ],
-                      ))
-                  : Container(),
-            ],
-          ),
-        ),
-      ),
+                  ):Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.signal_wifi_connected_no_internet_4,size: 200,),
+                        SizedBox(height: 10,),
+                        Text("No internet access",)
+                      ],
+                    ),
+                  );
+                },
+                child: Container(),
+              ))),
     );
   }
 
@@ -588,21 +665,21 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
       return Future.value(false);
     }
   }
-  void choiceAction(Choices choice){
-    if(choice.name_en == "Wish list"){
+
+  void choiceAction(Choices choice) {
+    if (choice.name_en == "Wish list") {
       controllerGlobal.loadUrl("${choice.link}");
-    }
-    else if(choice.name_en == "Frequently asked question"){
+    } else if (choice.name_en == "Frequently asked question") {
       controllerGlobal.loadUrl("${choice.link}");
-    }
-    else if(choice.name_en == "Return policy"){
+    } else if (choice.name_en == "Return policy") {
       controllerGlobal.loadUrl("${choice.link}");
-    } else if(choice.name_en == "loyalty Points"){
+    } else if (choice.name_en == "loyalty Points") {
       controllerGlobal.loadUrl("${choice.link}");
-    }else if(choice.name_en == "Installments"){
+    } else if (choice.name_en == "Installments") {
       controllerGlobal.loadUrl("${choice.link}");
     }
   }
+
   void _setWebViewHeight() {
     // we don't update if WebView is not ready yet
     // or page load is in progress
@@ -622,31 +699,32 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _performtrxn(BuildContext context, amount, orderid) async {
-    var lastResult = "";
-    var act = '1';
+// Future<void> _performtrxn(BuildContext context, amount, orderid) async {
+//   var lastResult = "";
+//   var act = '1';
+//
+//   print("In apple pay");
+//   lastResult = await Payment.makeapplepaypaymentService(
+//       context: context,
+//       country: "SA",
+//       action: act,
+//       currency: "SAR",
+//       amt: amount,
+//       customerEmail: "omarhussien61@gmail.com",
+//       trackid: orderid,
+//       udf1: "",
+//       udf2: "",
+//       udf3: "",
+//       udf4: "",
+//       udf5: "",
+//       tokenizationType: "1",
+//       merchantIdentifier: "merchant.com.alajlanonline.com.app",
+//       shippingCharge: "0.00",
+//       companyName: "alajlan online");
+//   controllerGlobal.loadUrl(
+//       "https://wiakum.com/payments/order/applepay?orderId=${orderid}&amount=${amount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
+//
+//   print('Payment $lastResult');
+// }
 
-    print("In apple pay");
-    lastResult = await Payment.makeapplepaypaymentService(
-        context: context,
-        country: "SA",
-        action: act,
-        currency: "SAR",
-        amt: amount,
-        customerEmail: "omarhussien61@gmail.com",
-        trackid: orderid,
-        udf1: "",
-        udf2: "",
-        udf3: "",
-        udf4: "",
-        udf5: "",
-        tokenizationType: "1",
-        merchantIdentifier: "merchant.com.alajlanonline.com.app",
-        shippingCharge: "0.00",
-        companyName: "alajlan online");
-    controllerGlobal.loadUrl(
-        "https://wiakum.com/payments/order/applepay?orderId=${orderid}&amount=${amount}&payment_result=success&merchant_reference=1999&payment_id=4343434");
-
-    print('Payment $lastResult');
-  }
 }
