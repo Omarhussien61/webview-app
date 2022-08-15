@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wiyakm/maintenance.dart';
-import 'package:wiyakm/navigator.dart';
+import 'package:wiyakm/screens/maintenance.dart';
+import 'package:wiyakm/utils/navigator.dart';
 import 'package:wiyakm/provider/theme_notifier.dart';
 
 import '../constants/strings.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:responsive_grid_list/responsive_grid_list.dart';
-import 'package:wiyakm/Categories.dart';
+import 'package:wiyakm/model/Categories.dart';
 import 'package:wiyakm/service/api.dart';
 
 class MainCategoriesPage extends StatefulWidget {

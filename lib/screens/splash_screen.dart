@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wiyakm/navigator.dart';
-import 'package:wiyakm/webview2.dart';
+import 'package:wiyakm/utils/navigator.dart';
+import 'package:wiyakm/screens/webview2.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

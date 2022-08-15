@@ -15,14 +15,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:urwaypayment/urwaypayment.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:wiyakm/apple_pay.dart';
 import 'package:wiyakm/constants/strings.dart';
-import 'package:wiyakm/main_categories.dart';
-import 'package:wiyakm/choices_model.dart';
-import 'package:wiyakm/myapp.dart';
-import 'package:wiyakm/navigator.dart';
+import 'package:wiyakm/screens/main_categories.dart';
+import 'package:wiyakm/model/choices_model.dart';
+import 'package:wiyakm/screens/myapp.dart';
+import 'package:wiyakm/utils/navigator.dart';
 import 'package:wiyakm/provider/theme_notifier.dart';
-import 'package:flutter_offline/flutter_offline.dart';
+
+import '../screens/apple_pay.dart';
 
 class Web_View2 extends StatefulWidget {
   @override
@@ -230,13 +230,7 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                   )
                 : Container(),
             actions: [
-              IconButton(
-                onPressed: () {
-                  controllerGlobal.reload();
-                  controllerGlobal.clearCache();
-                },
-                icon: Icon(Icons.refresh),
-              ),
+
               IconButton(
                 onPressed: () async {
                   await model.local == 'ar'
@@ -255,6 +249,12 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                   style: TextStyle(
                       color: Colors.deepOrange, fontWeight: FontWeight.bold),
                 ),
+              ), IconButton(
+                onPressed: () {
+                  controllerGlobal.reload();
+                  controllerGlobal.clearCache();
+                },
+                icon: Icon(Icons.refresh,color: Colors.deepOrangeAccent,),
               ),
             ],
           ),
@@ -330,248 +330,229 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
               alignment: Alignment.bottomLeft),
           body: WillPopScope(
               onWillPop: () => _exitApp(context),
-              child: OfflineBuilder(
-                connectivityBuilder: (
-                  BuildContext context,
-                  ConnectivityResult connectivity,
-                  Widget child,
-                ) {
-                  final bool connected =
-                      connectivity != ConnectivityResult.none;
-                  return connected?
-                  Stack(
-                    children: [
-                      Container(
-                        //  height:_webViewHeight,
-                        //height: MediaQuery.of(context).size.height,
-                        child: WebView(
-                          initialUrl: model.getBaseUrl(),
-                          javascriptMode: JavascriptMode.unrestricted,
-                          onWebViewCreated:
-                              (WebViewController webViewController) {
-                            setState(() {
-                              controllerGlobal = webViewController;
-                            });
-                            _controller.complete(webViewController);
+              child:  Stack(
+                children: [
+                  Container(
+                    //  height:_webViewHeight,
+                    //height: MediaQuery.of(context).size.height,
+                    child: WebView(
+                      initialUrl: model.getBaseUrl(),
+                      javascriptMode: JavascriptMode.unrestricted,
+                      onWebViewCreated:
+                          (WebViewController webViewController) {
+                        setState(() {
+                          controllerGlobal = webViewController;
+                        });
+                        _controller.complete(webViewController);
 
-                            /// controllerGlobal.clearCache();
-                          },
-                          onPageStarted: (String url) {
-                            setState(() {
-                              _isPageLoading = true;
-                            });
-                          },
-                          onPageFinished: (String url) {
-                            setState(() {
-                              _isPageLoading = false;
-                            });
-                            // if page load is finished, set height
-                            _setWebViewHeight();
-                          },
-                          onProgress: (int progress) async {
-                            canback = await controllerGlobal.canGoBack();
-                            setState(() {
-                              this.progress = progress;
-                              Loading = progress != 100;
-                            });
-                            print('WebView is loading (progress : $progress%)');
-                          },
-                          javascriptChannels: <JavascriptChannel>{
-                            _toasterJavascriptChannel(context),
-                          },
-                          navigationDelegate: (NavigationRequest request) async {
-                            print('allowing = ${request.url}');
+                        /// controllerGlobal.clearCache();
+                      },
+                      onPageStarted: (String url) {
+                        setState(() {
+                          _isPageLoading = true;
+                        });
+                      },
+                      onPageFinished: (String url) {
+                        setState(() {
+                          _isPageLoading = false;
+                        });
+                        // if page load is finished, set height
+                        _setWebViewHeight();
+                      },
+                      onProgress: (int progress) async {
+                        canback = await controllerGlobal.canGoBack();
+                        setState(() {
+                          this.progress = progress;
+                          Loading = progress != 100;
+                        });
+                        print('WebView is loading (progress : $progress%)');
+                      },
+                      javascriptChannels: <JavascriptChannel>{
+                        _toasterJavascriptChannel(context),
+                      },
+                      navigationDelegate: (NavigationRequest request) async {
+                        print('allowing = ${request.url}');
 
-                            // String url ="https://stage.wiakum.com/pub/applepay.php?order_id=55555&amount=1.00";
-                            Uri uri;
-                            uri = Uri.parse(request.url);
-                            if (request.url
-                                .startsWith('https://www.youtube.com/')) {
-                              print('blocking navigation to $request}');
-                              return NavigationDecision.prevent;
-                            } else if (request.url.startsWith(
-                                '${model.getBaseUrl()}payments/order/applepay')) {
-                              if (Platform.isAndroid) {
-                                final snackBar = SnackBar(
-                                    content: Text('Apple Pay works with IOS'));
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(snackBar);
-                                controllerGlobal
-                                    .loadUrl(Strings.MAIN_API_URL_AR ?? '');
-                              } else if (Platform.isIOS) {
+                        // String url ="https://stage.wiakum.com/pub/applepay.php?order_id=55555&amount=1.00";
+                        Uri uri;
+                        uri = Uri.parse(request.url);
+                        if (request.url
+                            .startsWith('https://www.youtube.com/')) {
+                          print('blocking navigation to $request}');
+                          return NavigationDecision.prevent;
+                        } else if (request.url.startsWith(
+                            '${model.getBaseUrl()}payments/order/applepay')) {
+                          if (Platform.isAndroid) {
+                            final snackBar = SnackBar(
+                                content: Text('Apple Pay works with IOS'));
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBar);
+                            controllerGlobal
+                                .loadUrl(Strings.MAIN_API_URL_AR ?? '');
+                          } else if (Platform.isIOS) {
+                            var result = await Navigator.push(context,
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return Apple_Pay(
+                                        order_id: "${uri.queryParameters['orderId']}",
+                                        mount: '${uri.queryParameters['amount']}',
+                                      );
+                                    }));
+                            if (result != null) {
+                              controllerGlobal.loadUrl(result);
+                            }
+                          }
+
+                          return NavigationDecision.prevent;
+                        } else if (request.url.startsWith(
+                            'https://api.whatsapp.com/send') ||
+                            request.url.startsWith(
+                                'https://www.facebook.com/sharer/sharer') ||
+                            request.url.startsWith(
+                                'https://twitter.com/intent/tweet?') ||
+                            request.url
+                                .startsWith('https://mail.google.com/mail')) {
+                          NavigationDecision.navigate;
+                          await controllerGlobal.goBack();
+                          await FlutterShare.share(
+                            title: 'وياكم  ',
+                            text: ' منصه آمنه للتجارة الإلكترونية',
+                            linkUrl: '$lastUrl',
+                          );
+                          controllerGlobal.loadUrl(lastUrl!);
+                        } else {
+                          lastUrl = request.url;
+                        }
+                        print('allowing navigation to $request');
+                        return NavigationDecision.navigate;
+                      },
+                      gestureNavigationEnabled: true,
+                      backgroundColor: const Color(0x00000000),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 1,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InkWell(
+                              onTap: () async {
+                                controllerGlobal.loadUrl(
+                                    "${model.getBaseUrl()}customer/account/login/");
+                              },
+                              child: Container(
+                                width: 55,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  //borderRadius: new BorderRadius.circular(20.0),
+                                ),
+                                child: Icon(
+                                  FontAwesomeIcons.user,
+                                ),
+                              )),
+                          InkWell(
+                              onTap: () async {
                                 var result = await Navigator.push(context,
                                     MaterialPageRoute(
                                         builder: (BuildContext context) {
-                                          return Apple_Pay(
-                                            order_id: "${uri.queryParameters['orderId']}",
-                                            mount: '${uri.queryParameters['amount']}',
-                                          );
+                                          return MainCategoriesPage();
                                         }));
                                 if (result != null) {
                                   controllerGlobal.loadUrl(result);
                                 }
-                              }
-
-                              return NavigationDecision.prevent;
-                            } else if (request.url.startsWith(
-                                'https://api.whatsapp.com/send') ||
-                                request.url.startsWith(
-                                    'https://www.facebook.com/sharer/sharer') ||
-                                request.url.startsWith(
-                                    'https://twitter.com/intent/tweet?') ||
-                                request.url
-                                    .startsWith('https://mail.google.com/mail')) {
-                              NavigationDecision.navigate;
-                              await controllerGlobal.goBack();
-                              await FlutterShare.share(
-                                title: 'وياكم  ',
-                                text: ' منصه آمنه للتجارة الإلكترونية',
-                                linkUrl: '$lastUrl',
-                              );
-                              controllerGlobal.loadUrl(lastUrl!);
-                            } else {
-                              lastUrl = request.url;
-                            }
-                            print('allowing navigation to $request');
-                            return NavigationDecision.navigate;
-                          },
-                          gestureNavigationEnabled: true,
-                          backgroundColor: const Color(0x00000000),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 1,
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              InkWell(
-                                  onTap: () async {
-                                    controllerGlobal.loadUrl(
-                                        "${model.getBaseUrl()}customer/account/login/");
-                                  },
-                                  child: Container(
-                                    width: 55,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      //borderRadius: new BorderRadius.circular(20.0),
-                                    ),
-                                    child: Icon(
-                                      FontAwesomeIcons.user,
-                                    ),
-                                  )),
-                              InkWell(
-                                  onTap: () async {
-                                    var result = await Navigator.push(context,
-                                        MaterialPageRoute(
-                                            builder: (BuildContext context) {
-                                              return MainCategoriesPage();
-                                            }));
-                                    if (result != null) {
-                                      controllerGlobal.loadUrl(result);
-                                    }
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                      new BorderRadius.circular(20.0),
-                                    ),
-                                    child: Image.asset(
-                                      "assets/computer-networks.png",
-                                      width: 30,
-                                      color: Colors.black87,
-                                    ),
-                                  )),
-                              InkWell(
-                                onTap: () {
-                                  controllerGlobal
-                                      .loadUrl("${Strings.MAIN_API_URL_AR}");
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: new BorderRadius.circular(20.0),
-                                    //  color: Colors.white,
-                                    //   boxShadow: const [
-                                    //      BoxShadow(
-                                    //         color: Colors.black12,
-                                    //         blurRadius: 5.0,
-                                    //         offset:  Offset(1.0, 1.0))
-                                    //   ],
-                                  ),
-                                  child: Image.asset(
-                                    "assets/logo_icon.png",
-                                    width: 50,
-                                    height: 50,
-                                  ),
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                  new BorderRadius.circular(20.0),
                                 ),
+                                child: Image.asset(
+                                  "assets/computer-networks.png",
+                                  width: 30,
+                                  color: Colors.black87,
+                                ),
+                              )),
+                          InkWell(
+                            onTap: () {
+                              controllerGlobal
+                                  .loadUrl("${Strings.MAIN_API_URL_AR}");
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: new BorderRadius.circular(20.0),
+                                //  color: Colors.white,
+                                //   boxShadow: const [
+                                //      BoxShadow(
+                                //         color: Colors.black12,
+                                //         blurRadius: 5.0,
+                                //         offset:  Offset(1.0, 1.0))
+                                //   ],
                               ),
-                              InkWell(
-                                  onTap: () async {},
-                                  child: Container(
-                                    width: 20,
-                                  )),
-                              InkWell(
-                                  onTap: () async {},
-                                  child: Container(
-                                    width: 20,
-                                  )),
-                              PopupMenuButton<Choices>(
-                                onSelected: choiceAction,
-                                itemBuilder: (BuildContext context) {
-                                  return choices.map((Choices choice) {
-                                    return PopupMenuItem<Choices>(
-                                      value: choice,
-                                      child: Row(
-                                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Icon(
-                                            choice.icon,
-                                            color: Colors.black87,
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text("${choice.name}"),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList();
-                                },
-                                icon: Icon(Icons.more_vert),
+                              child: Image.asset(
+                                "assets/logo_icon.png",
+                                width: 50,
+                                height: 50,
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          InkWell(
+                              onTap: () async {},
+                              child: Container(
+                                width: 20,
+                              )),
+                          InkWell(
+                              onTap: () async {},
+                              child: Container(
+                                width: 20,
+                              )),
+                          PopupMenuButton<Choices>(
+                            onSelected: choiceAction,
+                            itemBuilder: (BuildContext context) {
+                              return choices.map((Choices choice) {
+                                return PopupMenuItem<Choices>(
+                                  value: choice,
+                                  child: Row(
+                                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Icon(
+                                        choice.icon,
+                                        color: Colors.black87,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text("${choice.name}"),
+                                    ],
+                                  ),
+                                );
+                              }).toList();
+                            },
+                            icon: Icon(Icons.more_vert),
+                          ),
+                        ],
                       ),
-                      Loading
-                          ? Container(
-                          color: Colors.white,
-                          child: Stack(
-                            children: [
-                              Center(
-                                  child: Text("$progress %",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.deepOrangeAccent,
-                                          backgroundColor: Colors.white))),
-                              Center(child: Image.asset("assets/splash.gif")),
-                            ],
-                          ))
-                          : Container(),
-                    ],
-                  ):Center(
-                    child: Column(
-                      children: [
-                        Icon(Icons.signal_wifi_connected_no_internet_4,size: 200,),
-                        SizedBox(height: 10,),
-                        Text("No internet access",)
-                      ],
                     ),
-                  );
-                },
-                child: Container(),
-              ))),
+                  ),
+                  Loading
+                      ? Container(
+                      color: Colors.white,
+                      child: Stack(
+                        children: [
+                          Center(
+                              child: Text("$progress %",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.deepOrangeAccent,
+                                      backgroundColor: Colors.white))),
+                          Center(child: Image.asset("assets/splash.gif")),
+                        ],
+                      ))
+                      : Container(),
+                ],
+              )
+          )),
     );
   }
 

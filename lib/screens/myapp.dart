@@ -1,8 +1,9 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:wiyakm/provider/theme_notifier.dart';
-import 'package:wiyakm/splash_screen.dart';
+import 'package:wiyakm/screens/splash_screen.dart';
 
 
 class MyApp extends StatefulWidget {
@@ -26,6 +27,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+     FirebaseMessaging.instance.setAutoInitEnabled(true);
+
     _locale =
         Locale(Provider.of<Provider_control>(context, listen: false).local, "");
     super.initState();
