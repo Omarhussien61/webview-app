@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,13 +39,14 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
   bool _isPageLoading = true;
   bool Loading = true;
   String? lastUrl;
-
+  ConnectivityResult? connectivityResult;
+  bool isDeviceConnected = true;
   bool canback = false;
   int progress = 0;
   final Completer<WebViewController> _controller =
   Completer<WebViewController>();
   late WebViewController controllerGlobal;
-
+  var subscription;
   @override
   void initState() {
 
@@ -61,9 +64,37 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
           "${model.getBaseUrl()}installments-smart-payment-plan"),
     ];
     Future.delayed(Duration(seconds: 1), checkNewVersion);
+
+    subscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) async {
+      print("result : ${result.name} ${result.index}");
+      setState(() {
+        connectivityResult=result;
+      });
+      if(result != ConnectivityResult.none) {
+         InternetConnectionChecker().hasConnection.then((value) {
+           print(value);
+               setState(() => isDeviceConnected = value);
+         });
+      }else{
+        setState(() {
+          isDeviceConnected=false;
+        });
+      }
+
+      // Got a new connectivity status!
+    });
+
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
   }
+
+  @override
+  dispose() {
+    super.dispose();
+    WidgetsBinding.instance!.removeObserver(this);
+    subscription.cancel();
+  }
+
 
   checkNewVersion() async {
     try {
@@ -186,17 +217,10 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
 //    );
   }
 
-  @override
-  void dispose() {
-    // remove listener
-    WidgetsBinding.instance!.removeObserver(this);
-    super.dispose();
-  }
 
   @override
   void didChangeMetrics() {
     // on portrait / landscape or other change, recalculate height
-    _setWebViewHeight();
   }
 
   @override
@@ -214,7 +238,7 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
             backgroundColor: Colors.white,
             title: InkWell(
                 onTap: () {
-                  controllerGlobal.loadUrl("${Strings.MAIN_API_URL_AR}");
+                  controllerGlobal.loadUrl("${model.getBaseUrl()}");
                 },
                 child: Image.asset(
                   "assets/logo.png",
@@ -330,7 +354,7 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
               alignment: Alignment.bottomLeft),
           body: WillPopScope(
               onWillPop: () => _exitApp(context),
-              child:  Stack(
+              child:isDeviceConnected?  Stack(
                 children: [
                   Container(
                     //  height:_webViewHeight,
@@ -342,8 +366,8 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                           (WebViewController webViewController) {
                         setState(() {
                           controllerGlobal = webViewController;
+                          _controller.isCompleted?null:_controller.complete(webViewController);
                         });
-                        _controller.complete(webViewController);
 
                         /// controllerGlobal.clearCache();
                       },
@@ -357,7 +381,6 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                           _isPageLoading = false;
                         });
                         // if page load is finished, set height
-                        _setWebViewHeight();
                       },
                       onProgress: (int progress) async {
                         canback = await controllerGlobal.canGoBack();
@@ -551,9 +574,16 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
                       ))
                       : Container(),
                 ],
-              )
-          )),
-    );
+              ):Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.signal_wifi_connected_no_internet_4,size: 200,),
+                      SizedBox(height: 10,),
+                      Text("No internet access",)
+                    ],
+                  )
+          ),
+    )));
   }
 
   JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
@@ -661,24 +691,6 @@ class _Web_View2State extends State<Web_View2> with WidgetsBindingObserver {
     }
   }
 
-  void _setWebViewHeight() {
-    // we don't update if WebView is not ready yet
-    // or page load is in progress
-    if (controllerGlobal == null || _isPageLoading) {
-      return;
-    }
-    // execute JavaScript code in the loaded page
-    // to get body height
-    controllerGlobal
-        .evaluateJavascript('document.body.clientHeight')
-        .then((documentBodyHeight) {
-      // set height
-      setState(() {
-        print('WebView height set to: $documentBodyHeight');
-        _webViewHeight = double.parse(documentBodyHeight);
-      });
-    });
-  }
 
 // Future<void> _performtrxn(BuildContext context, amount, orderid) async {
 //   var lastResult = "";
